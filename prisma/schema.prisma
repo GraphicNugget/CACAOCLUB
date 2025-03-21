@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Administrateur {
+  id        Int @id @default(autoincrement())
+  email     String @unique
+  password  String
+}
+
+model Client {
+  id           Int @id @default(autoincrement())
+  email        String @unique
+  password     String
+  firstName    String
+  lastName     String
+
+  visites      Int @default(0) // Nombre de visites du client
+  promotions   Promotion[]  // Promotions obtenues par le client
+  reservations Reservation[]
+  commandes   Commande[]
+  avis         Avis[]
+}
+
+model Reservation {
+  id          Int @id @default(autoincrement())
+  date        DateTime
+  numeroTable Int
+  clientId    Int
+  client      Client @relation(fields: [clientId], references: [id])
+}
+
+model Boisson {
+  id           Int @id @default(autoincrement())
+  nom          String
+  description  String
+  prix         Float
+  personnalisation Personnalisation[]
+  commandes    Commande[]
+}
+
+model Produit {
+  id          Int @id @default(autoincrement())
+  nom         String
+  description String
+  prix        Float
+  stock       Stock? @relation("ProduitStock") // Relation vers Stock
+  commandes   Commande[]
+}
+
+model Stock {
+  id        Int @id @default(autoincrement())
+  produitId Int @unique // Chaque produit a un stock unique
+  quantite  Int
+  produit   Produit @relation("ProduitStock", fields: [produitId], references: [id]) // Relation vers Produit
+}
+
+model Personnalisation {
+  id             Int @id @default(autoincrement())
+  boissonId      Int // Lien vers la boisson
+  taille         String // Taille du verre ("Petit", "Moyen", "Grand")
+  cacaoType      String // Type de cacao ("Cacao Noir", "Cacao au Lait", "Cacao au Matcha")
+  laitType       String // Type de lait ("Lait de vache", "Lait d'amande", "Lait d'avoine")
+  
+  boisson        Boisson  @relation(fields: [boissonId], references: [id])
+}
+
+model Topping {
+  id          Int @id @default(autoincrement())
+  nom         String // Nom du topping ("Chantilly", "Noix de pécan" "Framboises")
+  description String // Description du topping
+  prix       Float // Prix du topping
+}
+
+model Commande {
+  id              Int @id @default(autoincrement())
+  clientId        Int
+  client          Client @relation(fields: [clientId], references: [id])
+  produits        Produit[]
+  boissonId       Int? // Référence à la boisson choisie
+  boisson         Boisson? @relation(fields: [boissonId], references: [id])
+  totalPrix       Float // Montant total de la commande
+}
+
+model Avis {
+  id        Int @id @default(autoincrement())
+  clientId  Int
+  notation  Int // Le client pourra mettre une note de 1 à 5
+  commantaire  String // Le client pourra laisser un commentaire
+  client    Client @relation(fields: [clientId], references: [id])
+}
+
+model Evenement {
+  id          Int @id @default(autoincrement())
+  titre       String
+  description String
+  date        DateTime
+}
+
+model Promotion {
+  id          Int @id @default(autoincrement())
+  description String
+  typePromo   String // Type de promotion, comme "Une boisson offerte"
+  promotion   Float // Pourcentage ou montant de la réduction
+  clientId    Int // Référence au client qui a cette promotion
+  client      Client   @relation(fields: [clientId], references: [id])
+}
+
