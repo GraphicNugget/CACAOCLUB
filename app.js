@@ -10,7 +10,7 @@ app.get('/', (req, res) => {
     res.render('pages/index.html.twig');
 });
 
-app.listen(process.env.PORT, ()=>{
+app.listen(process.env.PORT, (err)=>{
     if (err) {
         console.log('server listening on port')
     }
