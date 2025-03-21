@@ -1,4 +1,5 @@
 const express = require("express")
+require('dotenv').config()
 
 const app = express()
 
@@ -9,6 +10,9 @@ app.get('/', (req, res) => {
     res.render('pages/index.html.twig');
 });
 
-app.listen(3000, ()=>{
+app.listen(process.env.PORT, ()=>{
+    if (err) {
+        console.log('server listening on port')
+    }
     console.log("Écoute sur le port 3000");
 })
